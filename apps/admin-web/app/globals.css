@@ -1,0 +1,63 @@
+:root {
+  color-scheme: light;
+  font-family: "IBM Plex Sans", "PingFang SC", "Noto Sans SC", sans-serif;
+  background: #f3f5f7;
+  color: #1c232b;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background:
+    linear-gradient(135deg, rgba(26, 95, 122, 0.1), transparent 35%),
+    linear-gradient(180deg, #f2f4f7 0%, #e9edf2 100%);
+}
+
+.shell {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+}
+
+.hero {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 24px;
+  border: 1px solid rgba(28, 35, 43, 0.08);
+  box-shadow: 0 22px 60px rgba(28, 35, 43, 0.08);
+  padding: 32px;
+}
+
+.grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin-top: 24px;
+}
+
+.panel {
+  background: #f8fafc;
+  border-radius: 18px;
+  border: 1px solid rgba(28, 35, 43, 0.08);
+  padding: 20px;
+}
+
+.eyebrow {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #527082;
+}
+
+.muted {
+  color: #52606d;
+  line-height: 1.65;
+}
+

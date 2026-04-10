@@ -1,0 +1,132 @@
+services:
+  student-web:
+    image: node:22-alpine
+    working_dir: /workspace
+    command: sh -c "corepack enable && pnpm install && pnpm --filter student-web dev"
+    ports:
+      - "${STUDENT_WEB_PORT:-3000}:3000"
+    volumes:
+      - .:/workspace
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:${API_PORT:-8000}
+    depends_on:
+      - api
+
+  admin-web:
+    image: node:22-alpine
+    working_dir: /workspace
+    command: sh -c "corepack enable && pnpm install && pnpm --filter admin-web dev"
+    ports:
+      - "${ADMIN_WEB_PORT:-3001}:3001"
+    volumes:
+      - .:/workspace
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:${API_PORT:-8000}
+    depends_on:
+      - api
+
+  api:
+    build:
+      context: ./services/api
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      - ./services/api:/app
+      - api-venv:/app/.venv
+    command: sh -c "test -x .venv/bin/python || uv venv .venv --python 3.13 && uv sync && uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://k12:k12_local_password@postgres:5432/k12_math_matrix}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      MEILISEARCH_URL: ${MEILISEARCH_URL:-http://meilisearch:7700}
+      MEILISEARCH_MASTER_KEY: ${MEILISEARCH_MASTER_KEY:-local-meilisearch-key}
+      RUSTFS_ENDPOINT: ${RUSTFS_ENDPOINT:-http://rustfs:9000}
+      RUSTFS_ACCESS_KEY: ${RUSTFS_ACCESS_KEY:-rustfsadmin}
+      RUSTFS_SECRET_KEY: ${RUSTFS_SECRET_KEY:-ChangeMe123!}
+      RUSTFS_BUCKET_MEDIA: ${RUSTFS_BUCKET_MEDIA:-k12-math-media}
+      JWT_SECRET: ${JWT_SECRET:-change-this-in-real-env}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      meilisearch:
+        condition: service_started
+      rustfs:
+        condition: service_started
+
+  worker:
+    build:
+      context: ./services/api
+    volumes:
+      - ./services/api:/app
+      - api-venv:/app/.venv
+    command: sh -c "test -x .venv/bin/python || uv venv .venv --python 3.13 && uv sync && uv run celery -A app.tasks.celery_app.celery_app worker --loglevel=info"
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://k12:k12_local_password@postgres:5432/k12_math_matrix}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      MEILISEARCH_URL: ${MEILISEARCH_URL:-http://meilisearch:7700}
+      MEILISEARCH_MASTER_KEY: ${MEILISEARCH_MASTER_KEY:-local-meilisearch-key}
+      RUSTFS_ENDPOINT: ${RUSTFS_ENDPOINT:-http://rustfs:9000}
+      RUSTFS_ACCESS_KEY: ${RUSTFS_ACCESS_KEY:-rustfsadmin}
+      RUSTFS_SECRET_KEY: ${RUSTFS_SECRET_KEY:-ChangeMe123!}
+      RUSTFS_BUCKET_MEDIA: ${RUSTFS_BUCKET_MEDIA:-k12-math-media}
+      JWT_SECRET: ${JWT_SECRET:-change-this-in-real-env}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      meilisearch:
+        condition: service_started
+      rustfs:
+        condition: service_started
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-k12_math_matrix}
+      POSTGRES_USER: ${POSTGRES_USER:-k12}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-k12_local_password}
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-k12} -d ${POSTGRES_DB:-k12_math_matrix}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data/redis:/data
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.13
+    environment:
+      MEILI_MASTER_KEY: ${MEILISEARCH_MASTER_KEY:-local-meilisearch-key}
+    ports:
+      - "7700:7700"
+    volumes:
+      - ./data/meilisearch:/meili_data
+
+  rustfs:
+    image: ${RUSTFS_IMAGE:-rustfs/rustfs:latest}
+    environment:
+      RUSTFS_ACCESS_KEY: ${RUSTFS_ACCESS_KEY:-rustfsadmin}
+      RUSTFS_SECRET_KEY: ${RUSTFS_SECRET_KEY:-ChangeMe123!}
+      RUSTFS_CONSOLE_ENABLE: "true"
+    command:
+      - /data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - ./data/rustfs:/data
+      - ./logs/rustfs:/logs
+
+volumes:
+  api-venv:

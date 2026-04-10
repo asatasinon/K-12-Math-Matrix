@@ -1,0 +1,12 @@
+{
+  "name": "k-12-math-matrix",
+  "private": true,
+  "packageManager": "pnpm@10.7.0",
+  "scripts": {
+    "dev:student": "pnpm --filter student-web dev",
+    "dev:admin": "pnpm --filter admin-web dev",
+    "dev:web": "pnpm -r --parallel --filter ./apps/* dev",
+    "build:web": "pnpm --filter student-web build && pnpm --filter admin-web build",
+    "lint:web": "pnpm --filter student-web lint && pnpm --filter admin-web lint"
+  }
+}
