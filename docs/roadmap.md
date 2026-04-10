@@ -26,7 +26,7 @@
 - 学生前台：首页、课程树、知识点详情页、搜索页
 - 教研后台：知识点编辑、关系编辑、审核中心
 - 后端服务：FastAPI API + Celery Worker
-- 基础服务：PostgreSQL、Redis、Meilisearch、MinIO
+- 基础服务：PostgreSQL、Redis、Meilisearch、RustFS
 - 内容能力：理论、公式、案例、技巧、静态图、少量交互图、视频嵌入
 - AI 能力：知识点初稿生成、基础质检
 

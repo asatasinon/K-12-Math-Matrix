@@ -28,7 +28,7 @@ K-12 Math Matrix 是一个面向中国大陆学生的数学知识内容平台，
 - 教研后台：提供内容编辑、关系维护、媒体绑定、审核发布、版本回滚
 - 业务 API：提供内容读写、关系查询、搜索聚合、审核流、AI 任务编排
 - 异步 Worker：负责 AI 任务、索引刷新、缓存刷新、媒体后处理
-- 基础服务：PostgreSQL、Redis、Meilisearch、MinIO
+- 基础服务：PostgreSQL、Redis、Meilisearch、RustFS
 - 外部能力：大模型服务、外部视频托管平台
 
 ```mermaid
@@ -39,7 +39,7 @@ flowchart LR
   B --> D[(PostgreSQL)]
   B --> E[(Redis)]
   B --> F[(Meilisearch)]
-  B --> G[(MinIO)]
+  B --> G[(RustFS)]
   B --> H[LLM Provider]
   J --> E
   J --> D
@@ -117,7 +117,7 @@ FastAPI 负责同步 API、鉴权、参数校验和聚合查询，不承担长�
 - PostgreSQL：主数据库，存知识实体、关系、版本、审核记录
 - Redis：缓存、任务队列、节流、热点查询加速
 - Meilisearch：全文搜索与筛选检索
-- MinIO：图片、封面、导出资源等对象存储
+- RustFS：图片、封面、导出资源等对象存储，统一通过 S3 兼容接口访问
 
 ### 4.6 外部能力
 
@@ -176,7 +176,7 @@ FastAPI 负责同步 API、鉴权、参数校验和聚合查询，不承担长�
 
 ### 7.1 图片与静态图
 
-- 静态说明图直接作为资源文件存储在 MinIO
+- 静态说明图直接作为资源文件存储在 RustFS
 - 几何作图优先保存为 SVG
 - 每个图对应 `DiagramSpec`，记录类型、用途、关联知识点、可交互性
 
@@ -222,7 +222,7 @@ FastAPI 负责同步 API、鉴权、参数校验和聚合查询，不承担长�
 - `postgres`
 - `redis`
 - `meilisearch`
-- `minio`
+- `rustfs`
 
 后续平台化阶段再迁移到 K8s 或等价容器编排方案。
 
