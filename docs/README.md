@@ -15,14 +15,18 @@
 - `roadmap.md`：三阶段产品与技术路线图
 - `data-model.md`：内容实体、关系模型与 API 草案
 - `content-pipeline.md`：AI 辅助内容生产与审核流程
+- `api-spec.md`：REST API 接口细化文档
+- `database-schema.md`：数据库表结构与索引设计文档
 
 推荐阅读顺序：
 
 1. `architecture.md`
 2. `tech-stack.md`
 3. `data-model.md`
-4. `content-pipeline.md`
-5. `roadmap.md`
+4. `api-spec.md`
+5. `database-schema.md`
+6. `content-pipeline.md`
+7. `roadmap.md`
 
 如果后续新增文档数量超过 10 份，建议再做一次目录重构，按以下方式迁移：
 
